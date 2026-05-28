@@ -1,0 +1,601 @@
+{
+  "name": "centro academico tesoureiros",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -256,
+        48
+      ],
+      "id": "002d2d27-4d3d-4690-a321-d587b60da0e1",
+      "name": "Telegram Trigger",
+      "webhookId": "d9d3e9e0-6afb-4e0c-a76c-9ad1744b56b3",
+      "notesInFlow": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "genenrBYmHoZbhnd",
+          "name": "bot centro acadêmico"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "texto = _items[0][\"json\"][\"message\"][\"text\"]\npartes = texto.split()\ntipo = partes[0].lower()\nchat_id = _items[0][\"json\"][\"message\"][\"chat\"][\"id\"]\n\nif tipo == \"saldo\":\n    return [{\"json\": {\"tipo\": \"saldo\", \"chat_id\": chat_id}}]\n\nif tipo == \"/start\":\n    return [{\"json\": {\"tipo\": \"start\", \"chat_id\": chat_id}}]\n\nif len(partes) < 2:\n    return [{\"json\": {\"tipo\": \"erro\", \"chat_id\": chat_id}}]\n\nvalor_str = partes[1].replace(\",\", \".\")\nvalor = float(valor_str)\nvalor_fmt = \"{:.2f}\".format(valor)\ndescricao = \" \".join(partes[3:])\n\nreturn [{\"json\": {\"tipo\": tipo, \"valor\": valor_fmt, \"descricao\": descricao, \"chat_id\": chat_id}}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        32,
+        48
+      ],
+      "id": "d6c99457-20eb-4468-b479-04aa7e1dc152",
+      "name": "Code in Python"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "5634bae8-0107-4711-ae8f-6cc77854f3c2",
+                    "leftValue": "={{ $json.tipo }}",
+                    "rightValue": "entrada",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "entrada"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "ade22163-6221-4b83-80db-3b8d68594e0a",
+                    "leftValue": "={{ $json.tipo }}",
+                    "rightValue": "saida",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "saida"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "39daded1-6c80-4bbc-b8c8-8917fc72cc31",
+                    "leftValue": "={{ $json.tipo }}",
+                    "rightValue": "saldo",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": "={{ true }}"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "bd8e504d-34e3-4850-8f89-394884b96e6e",
+                    "leftValue": "={{ $json.tipo }}",
+                    "rightValue": "start",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "start"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        304,
+        0
+      ],
+      "id": "bc8e6efa-4c3a-4ac3-89ba-c7a9396c0482",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Code in Python').item.json.chat_id }}",
+        "text": "❌ Ops! Não entendi seu comando.\n\nUse um dos formatos abaixo:\n\n📗 ENTRADA de valor:\nentrada 150,00 - Descrição\n\n📕 SAÍDA de valor:\nsaida 80,00 - Descrição\n\n📊 Ver saldo atual:\nsaldo\n\n⚠️ Atenção:\n- Use vírgula para os centavos\n- A descrição vem depois do traço\n- Escreva em letras minúsculas",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        688,
+        496
+      ],
+      "id": "c2e73b2e-54cf-4789-ad10-a7ee81357fd0",
+      "name": "Send a text message",
+      "webhookId": "a97c6cac-5d3e-49e9-b2fd-baf15714157e",
+      "credentials": {
+        "telegramApi": {
+          "id": "genenrBYmHoZbhnd",
+          "name": "bot centro acadêmico"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1vId5jDY9gDLHnVSLhnH7_0rkON7lyvdwVUMhjeNFAJ0",
+          "mode": "list",
+          "cachedResultName": "Financeiro Centro Acadêmico",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vId5jDY9gDLHnVSLhnH7_0rkON7lyvdwVUMhjeNFAJ0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vId5jDY9gDLHnVSLhnH7_0rkON7lyvdwVUMhjeNFAJ0/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "TIPO": "={{ $('Code in Python').item.json.tipo }}",
+            "VALOR": "={{ $('Code in Python').item.json.valor }}",
+            "DESCRIÇÃO": "={{ $('Code in Python').item.json.descricao }}"
+          },
+          "matchingColumns": [
+            "DATA"
+          ],
+          "schema": [
+            {
+              "id": "TIPO",
+              "displayName": "TIPO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "DESCRIÇÃO",
+              "displayName": "DESCRIÇÃO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "VALOR",
+              "displayName": "VALOR",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        688,
+        -400
+      ],
+      "id": "8940780f-c8b5-436e-a3bb-7f5fb39e19d1",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0tKOzyqTlS5IjudX",
+          "name": "centro acadêmico financeiro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Code in Python').item.json.chat_id }}",
+        "text": "=✅ Lançamento registrado com sucesso!\n📗 Tipo: {{ $('Code in Python').item.json.tipo }}\n💰Valor: {{ $('Code in Python').item.json.valor }}\n📝 Descrição: {{ $('Code in Python').item.json.descricao }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        928,
+        -400
+      ],
+      "id": "8c545536-c53c-49ab-a3b3-a7060750a751",
+      "name": "Send a text message1",
+      "webhookId": "fa8e63bb-7057-4b5a-888e-5cb4905cb452",
+      "credentials": {
+        "telegramApi": {
+          "id": "genenrBYmHoZbhnd",
+          "name": "bot centro acadêmico"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1vId5jDY9gDLHnVSLhnH7_0rkON7lyvdwVUMhjeNFAJ0",
+          "mode": "list",
+          "cachedResultName": "Financeiro Centro Acadêmico",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vId5jDY9gDLHnVSLhnH7_0rkON7lyvdwVUMhjeNFAJ0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vId5jDY9gDLHnVSLhnH7_0rkON7lyvdwVUMhjeNFAJ0/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "TIPO": "={{ $('Code in Python').item.json.tipo }}",
+            "VALOR": "={{ $('Code in Python').item.json.valor }}",
+            "DESCRIÇÃO": "={{ $('Code in Python').item.json.descricao }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "TIPO",
+              "displayName": "TIPO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "DESCRIÇÃO",
+              "displayName": "DESCRIÇÃO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "VALOR",
+              "displayName": "VALOR",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        688,
+        -176
+      ],
+      "id": "97e9d1bc-a71a-4e53-bf83-22a426da7ef1",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0tKOzyqTlS5IjudX",
+          "name": "centro acadêmico financeiro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Code in Python').item.json.chat_id }}",
+        "text": "=✅ Saída registrada com sucesso! \n📕 Tipo: {{ $('Code in Python').item.json.tipo }} \n💸 Valor: R$ {{ $('Code in Python').item.json.valor }} \n📝 Descrição: {{ $('Code in Python').item.json.descricao }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        928,
+        -176
+      ],
+      "id": "97687623-88b4-4cbe-b8da-44ccb43da575",
+      "name": "Send a text message2",
+      "webhookId": "b834a8d5-17f8-4bdc-9ebc-cf766c2b287c",
+      "credentials": {
+        "telegramApi": {
+          "id": "genenrBYmHoZbhnd",
+          "name": "bot centro acadêmico"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1vId5jDY9gDLHnVSLhnH7_0rkON7lyvdwVUMhjeNFAJ0",
+          "mode": "list",
+          "cachedResultName": "Financeiro Centro Acadêmico",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vId5jDY9gDLHnVSLhnH7_0rkON7lyvdwVUMhjeNFAJ0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vId5jDY9gDLHnVSLhnH7_0rkON7lyvdwVUMhjeNFAJ0/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        688,
+        80
+      ],
+      "id": "b7b7cbe5-9834-48c0-98d0-8e1d96c14d0a",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0tKOzyqTlS5IjudX",
+          "name": "centro acadêmico financeiro"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "entradas = 0\nsaidas = 0\n\nfor item in _items:\n    if not item or not item.get(\"json\"):\n        continue\n        \n    tipo = item[\"json\"].get(\"TIPO\", \"\")\n    valor_raw = item[\"json\"].get(\"VALOR\", 0)\n    \n    if not tipo or not valor_raw:\n        continue\n        \n    valor = float(str(valor_raw).replace(\",\", \".\"))\n    \n    if tipo == \"entrada\":\n        entradas += valor\n    elif tipo == \"saida\":\n        saidas += valor\n\nsaldo = entradas - saidas\n\nentradas_fmt = \"{:.2f}\".format(entradas)\nsaidas_fmt = \"{:.2f}\".format(saidas)\nsaldo_fmt = \"{:.2f}\".format(saldo)\n\nreturn [{\"json\": {\"entradas\": entradas_fmt, \"saidas\": saidas_fmt, \"saldo\": saldo_fmt}}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        80
+      ],
+      "id": "ce319b01-5e13-422a-b8d9-650916e379cb",
+      "name": "Code in Python1"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Code in Python').item.json.chat_id }}",
+        "text": "=📊 Saldo do Centro Acadêmico\n\n📗 Total Entradas: R$ {{ $('Code in Python1').item.json.entradas }}\n📕 Total Saídas: R$ {{ $('Code in Python1').item.json.saidas }}\n💰 Saldo Atual: R$ {{ $('Code in Python1').item.json.saldo }}\n\n📋 Acesse a planilha completa:\nhttps://docs.google.com/spreadsheets/d/1vId5jDY9gDLHnVSLhnH7_0rkON7lyvdwVUMhjeNFAJ0/edit",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1136,
+        80
+      ],
+      "id": "d8aa81fb-3063-4be4-aa76-2888f15f087a",
+      "name": "Send a text message3",
+      "webhookId": "95811fc1-0653-4f19-97f9-47ad24bbc282",
+      "credentials": {
+        "telegramApi": {
+          "id": "ygOVF4CaS7H9in9F",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Code in Python').item.json.chat_id }}",
+        "text": "👋 Olá! Bem-vindo ao bot do Centro Acadêmico! \n Aqui você pode registrar e consultar os valores financeiros do CA. \nUse os comandos abaixo:  \n📗 Registrar entrada: entrada 150,00 - Descrição  \n\n📕 Registrar saída: saida 80,00 - Descrição  \n\n📊 Ver saldo atual: saldo",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        688,
+        288
+      ],
+      "id": "bf6798b2-13d5-4425-ac48-7f224b83a0d1",
+      "name": "Send a text message4",
+      "webhookId": "bc34d2e5-bdf6-4ee8-8036-bce0fef62660",
+      "credentials": {
+        "telegramApi": {
+          "id": "ygOVF4CaS7H9in9F",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in Python",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in Python": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in Python1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in Python1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "18e1cdac-ddbc-46ad-9a8d-d8f98583e7ba",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7105160b7c8f9f55a0ff6949732757a6a546886b962502e433527dc40769322c"
+  },
+  "id": "6cwvxcgrcil0TceJ",
+  "tags": []
+}
