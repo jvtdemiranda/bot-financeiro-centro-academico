@@ -56,9 +56,18 @@ Switch (direciona pelo tipo)
 | `saida 80,00 - Descrição` | Registra uma saída |
 | `saldo` | Exibe o saldo atual |
 
+## 📁 Estrutura do repositório
+
+```
+bot-financeiro-centro-academico/
+├── README.md
+└── n8n-workflows/
+    └── centro-academico-financeiro.json   # workflow exportado do n8n
+```
+
 ## 🚀 Como usar
 
-1. Importe o arquivo `workflow.json` no n8n
+1. Importe o arquivo [`n8n-workflows/centro-academico-financeiro.json`](./n8n-workflows/centro-academico-financeiro.json) no n8n (Workflows → Import from File)
 2. Configure as credenciais do Telegram e Google Sheets
 3. Ative o workflow
 4. Pronto!
