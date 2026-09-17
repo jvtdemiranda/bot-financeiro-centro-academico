@@ -1,5 +1,7 @@
 # 🏫 Controle Financeiro pelo Telegram
 
+![License](https://img.shields.io/badge/license-MIT-blue.svg) ![n8n](https://img.shields.io/badge/n8n-workflow-orange.svg) ![Telegram](https://img.shields.io/badge/Telegram-Bot%20API-26A5E4.svg)
+
 Chega de planilhas complicadas! Com esse bot você registra 
 entradas e saídas financeiras direto pelo Telegram em segundos 
 — sem precisar abrir nenhum sistema.
@@ -75,3 +77,7 @@ bot-financeiro-centro-academico/
 ## 👨‍💻 Autor
 
 João Vitor — [github.com/jvtdemiranda](https://github.com/jvtdemiranda)
+
+## 📜 Licença
+
+Distribuído sob a licença MIT. Veja [LICENSE](./LICENSE) para mais detalhes.
